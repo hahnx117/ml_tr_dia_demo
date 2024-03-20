@@ -8,6 +8,23 @@ import os
 WHISPER_HF_TOKEN = os.getenv("WHISPER_HF_TOKEN")
 TEST_FILE = "data/clip.mp3"
 
+SPEAKER_00 = "SPEAKER_00"
+SPEAKER_01 = "SPEAKER_01"
+#SPEAKER_02 = "SPEAKER_02"
+#SPEAKER_03 = "SPEAKER_03"
+
+def name_speaker(speaker_id):
+    if speaker_id == "SPEAKER_00":
+        return SPEAKER_00
+    elif speaker_id == "SPEAKER_01":
+        return SPEAKER_01
+    #elif speaker_id == "SPEAKER_02":
+    #    return SPEAKER_02
+    #elif speaker_id == "SPEAKER_03":
+    #    return SPEAKER_03
+    else:
+        return "UNKNOWN"
+
 def find_speaker(search_tuple, diarization_result):
     #, 
     """
