@@ -3,7 +3,7 @@ Demo using ML tools for transcription and diarization.
 
 ## Installing and running the demo
 
-### Using Python and pip
+### Using Python and `pip`
 There are two methods of using this repo:
 
 1. Clone the repo down,
