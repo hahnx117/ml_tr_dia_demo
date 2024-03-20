@@ -26,7 +26,6 @@ def name_speaker(speaker_id):
         return "UNKNOWN"
 
 def find_speaker(search_tuple, diarization_result):
-    #, 
     """
     Take in diarization result and return speaker block.
     return speaker id.
@@ -42,27 +41,53 @@ def find_speaker(search_tuple, diarization_result):
         if turn.start <= avg_time + time_correction <= turn.end:
             return speaker
 
+def transcript_demo(transcription):
+    """Demo transcriptions and segmentation."""
+    ## Print the transcrption itself
+    print("Transcription:")
+    print(transcription['text'])
+    print("\n\n")
+
+    ## Show segmentation of transcription result
+    print("Transcription segmentation:")
+    print(transcription['segments'][:3])
+    print("\n\n")
+
+def diarization_demo(diarization):
+    """Demo diarization."""
+    ## Print the diarization
+    print("Diarization:")
+    for turn, _, speaker in diarization.itertracks(yield_label=True):
+        print(f"start={turn.start:.1f}s stop={turn.end:.1f}s speaker_{speaker}")
+    print("\n\n")
 
 
-## First create the transcript
-model = whisper.load_model("tiny.en")
-result = model.transcribe(TEST_FILE)
+if __name__ == "__main__":
+    ## First create the transcript
+    model = whisper.load_model("tiny.en")
+    result = model.transcribe(TEST_FILE)
 
-## Now create the diarization
-pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=WHISPER_HF_TOKEN)
-
-
-# Comment out the CPU line and use GPU if you have CUDA installed and available
-# pipeline.to(torch.device("cuda"))
-pipeline.to(torch.device("cpu"))
-
-with ProgressHook() as hook:
-    diarization = pipeline(TEST_FILE, hook=hook)
+    ## Now create the diarization
+    pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=WHISPER_HF_TOKEN)
 
 
-## Now go through line by line and assign a speaker
-for i in result['segments']:
-    time_tuple = (i['start'], i['end'])
-    active_speaker = find_speaker(time_tuple, diarization)
-    print(f"{name_speaker(active_speaker)}: {i['text']}")
-    #print(f"{i['text']}")
+    ## Comment out the "mps" and "cpu" line and use gpu if you have CUDA installed and available.
+    ## Comment out the "cpu" and "gpu" lines if you have a Mac M1/M2/M3
+    # pipeline.to(torch.device("cuda")) # Use this line if you have an Nvidia GPU
+    # pipeline.to(torch.device("mps")) # Use this line if you have a Mac M1/M2/M3
+    pipeline.to(torch.device("cpu")) # Use this line if you only have a CPU
+
+    with ProgressHook() as hook:
+        diarization = pipeline(TEST_FILE, hook=hook)
+    
+    transcript_demo(result)
+    diarization_demo(diarization)
+
+    ## Now go through line by line and assign a speaker
+    for i in result['segments']:
+        time_tuple = (i['start'], i['end'])
+        active_speaker = find_speaker(time_tuple, diarization)
+        print(f"{name_speaker(active_speaker)}: {i['text']}")
+        #print(f"{i['text']}")
+    
+    #pass
