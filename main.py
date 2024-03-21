@@ -4,6 +4,7 @@ import whisper
 from pprint import pprint
 import torch
 import os
+from sys import exit
 
 WHISPER_HF_TOKEN = os.getenv("WHISPER_HF_TOKEN")
 TEST_FILE = "data/clip.mp3"
@@ -65,7 +66,14 @@ def diarization_demo(diarization):
 if __name__ == "__main__":
     ## First create the transcript
     model = whisper.load_model("tiny.en")
-    result = model.transcribe(TEST_FILE)
+    try:
+        result = model.transcribe(TEST_FILE)
+    except FileNotFoundError:
+        print(f"Error: The file {TEST_FILE} was not found.")
+        exit(1)
+    except Exception as e:
+        print(f"Error: An unexpected error occurred while reading the file {TEST_FILE}: {str(e)}")
+        exit(1)
 
     ## Now create the diarization
     pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=WHISPER_HF_TOKEN)
@@ -79,9 +87,10 @@ if __name__ == "__main__":
 
     with ProgressHook() as hook:
         diarization = pipeline(TEST_FILE, hook=hook)
-    
+
     transcript_demo(result)
     diarization_demo(diarization)
+
 
     ## Now go through line by line and assign a speaker
     for i in result['segments']:
