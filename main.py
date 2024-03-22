@@ -62,6 +62,14 @@ def diarization_demo(diarization):
         print(f"start={turn.start:.1f}s stop={turn.end:.1f}s speaker_{speaker}")
     print("\n\n")
 
+def combo_demo(transcription, diarization):
+    """Demo the combination of the two."""
+    ## Now go through line by line and assign a speaker
+    for i in transcription['segments']:
+        time_tuple = (i['start'], i['end'])
+        active_speaker = find_speaker(time_tuple, diarization)
+        print(f"{name_speaker(active_speaker)}: {i['text']}")
+        #print(f"{i['text']}")
 
 if __name__ == "__main__":
     ## First create the transcript
@@ -90,13 +98,4 @@ if __name__ == "__main__":
 
     transcript_demo(result)
     diarization_demo(diarization)
-
-
-    ## Now go through line by line and assign a speaker
-    for i in result['segments']:
-        time_tuple = (i['start'], i['end'])
-        active_speaker = find_speaker(time_tuple, diarization)
-        print(f"{name_speaker(active_speaker)}: {i['text']}")
-        #print(f"{i['text']}")
-    
-    #pass
+    combo_demo(result, diarization)
